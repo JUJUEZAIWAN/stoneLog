@@ -1,4 +1,5 @@
-# stoneLog [中文](README.MD)
+# stoneLog 
+[中文](README.MD)
 
 stonelog is a simple and high-performance C++ log library that references the muduo log library and spdlog log, supports stream input and formatted input, local, network and other multi-output.
 
@@ -7,15 +8,15 @@ Refer to the muduo log library and spdlog log implementation, each line of the l
 The asynchronous implementation refers to the double buffer in muduo, and the log information is written to the local file or network file through a background thread. The thread local buffer is used between the front end and the back end, and the front end writes multiple log information to the thread local buffer. When the thread local buffer is full, the log information in the buffer is written to the back end buffer, which can reduce the competition of locks and improve performance.
 
 ## features
-·stream input and formatted input
-·synchronous/asynchronous log
-·local/remote log
-·log file rolling
-·output is easy to expand
+·stream input and formatted input  
+·synchronous/asynchronous log  
+·local/remote log  
+·log file rolling  
+·output is easy to expand  
 
 ## dependency
-·C++17
-·fmtlib (included)
+·C++17  
+·fmtlib (included)  
 
 
 ## 使用
@@ -112,7 +113,7 @@ void testFmt()
 
 ## TODO
 
-·Cross-platform: Currently only supports linux, and will support windows later
-·Dynamic configuration of logs: Currently only supports compile-time configuration, and will support runtime configuration later
-·Performance test: Currently only a simple test, and will be tested in more detail later
-·Support more outputs: Currently supports local files, TCP, UDP, and will support more outputs later
+·Cross-platform: Currently only supports linux, and will support windows later  
+·Dynamic configuration of logs: Currently only supports compile-time configuration, and will support runtime configuration later  
+·Performance test: Currently only a simple test, and will be tested in more detail later  
+·Support more outputs: Currently supports local files, TCP, UDP, and will support more outputs later  

@@ -1,16 +1,30 @@
 #include "UdpFile.h"
 
+
+#ifdef  _WIN32
+#include <winsock2.h>
+#define close closesocket
+#else
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#endif
 
 #include <cstdlib>
 
 using namespace stone;
 
-UdpAppender::UdpAppender(std::string_view ip, int port) : sockfd_(-1)
+UdpAppender::UdpAppender(std::string_view ip, int port) : sockfd_(-1), appendBuffer_()
 {
+
+#ifdef _WIN32
+    WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+    {
+        abort();
+    }
+#endif
     addr_.sin_family = AF_INET;
     addr_.sin_port = htons(port);
     addr_.sin_addr.s_addr = inet_addr(ip.data());
@@ -27,6 +41,9 @@ UdpAppender::~UdpAppender()
     {
         ::close(sockfd_);
     }
+#ifdef _WIN32
+    WSACleanup();
+#endif // _WIN32
 }
 
 void UdpAppender::append(const char *line, size_t len)

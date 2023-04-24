@@ -28,11 +28,16 @@ namespace stone
         public:
             constexpr SourceFile(std::string_view filename) : filename_(filename)
             {
+#ifdef _WIN32
+                auto slash = filename_.rfind('\\');
+#else
                 auto slash = filename_.rfind('/');
+#endif
                 if (slash != std::string_view::npos)
                 {
                     filename_ = filename_.substr(slash + 1);
                 }
+
             }
 
             constexpr std::string_view filename()

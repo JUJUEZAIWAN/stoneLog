@@ -5,7 +5,14 @@
 #include <string_view>
 #include <array>
 #include <memory>
+
+#ifdef  _WIN32
+#include <winsock2.h>
+
+#else
+#include <sys/socket.h>
 #include <netinet/in.h>
+#endif
 
 namespace stone
 {
@@ -38,7 +45,6 @@ namespace stone
         void append(const char *logline, int len);
         void flush();
 
-    private:
     private:
         std::unique_ptr<UdpAppender> appender_;
     };

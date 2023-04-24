@@ -1,6 +1,7 @@
 #include "TcpFile.h"
 
 #ifdef _WIN32
+#pragma comment(lib,"ws2_32.lib")
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
@@ -32,7 +33,7 @@ TcpAppender::TcpAppender(std::string_view ip, int port)
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
     {
-        return false;
+        abort();
     }
 #endif
     // if connect failed, abort,it should not happen in Intranet
@@ -48,6 +49,11 @@ TcpAppender::~TcpAppender()
     {
         ::close(sockfd_);
     }
+
+#ifdef _WIN32
+    WSACleanup();
+#endif // _WIN32
+
 }
 
 bool TcpAppender::connect()
@@ -68,9 +74,31 @@ bool TcpAppender::connect()
         return false;
     }
 
-    // set no nagle algorithm
     int opt = 1;
-    if (::setsockopt(sockfd_, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt)) == -1)
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 500;  // 500ms, because use it in Intranet, so 500ms is enough 
+
+#ifdef _WIN32
+    if(::setsockopt(sockfd_, IPPROTO_TCP, TCP_NODELAY, reinterpret_cast<char *>(&opt), sizeof(opt)) == -1)
+	{
+		return false;
+	}
+    // set keepalive
+    if (::setsockopt(sockfd_, SOL_SOCKET, SO_KEEPALIVE, reinterpret_cast<char*>(&opt), sizeof(opt)) == -1)
+    {
+		return false;
+	}
+	// set send timeout
+    if (::setsockopt(sockfd_, SOL_SOCKET, SO_SNDTIMEO, reinterpret_cast<char*>(&tv), sizeof(tv)) == -1)
+    {
+		return false;
+	}   
+
+#else
+    // set no nagle algorithm
+    
+    if (::setsockopt(sockfd_, IPPROTO_TCP, TCP_NODELAY,  &opt , sizeof(opt)) == -1)
     {
         return false;
     }
@@ -81,14 +109,13 @@ bool TcpAppender::connect()
     }
 
     // set send timeout
-    struct timeval tv;
-    tv.tv_sec = 0;  
-    tv.tv_usec = 500;  // 500ms, because use it in Intranet, so 500ms is enough 
+   
     if (::setsockopt(sockfd_, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv)) == -1)
     {
         return false;
     }
 
+#endif // _WIN32
     return true;
 }
 

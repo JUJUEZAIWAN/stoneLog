@@ -31,7 +31,7 @@ void LogStream::append(const char *line, int len)
     buf_.append(line, len);
 }
 
-LogStream &LogStream::operator<<(const std::string_view &s)
+LogStream &LogStream::operator<<(std::string_view s)
 {
     buf_.append(s.data(), s.length());
     return *this;

@@ -1,30 +1,33 @@
 
 #include "LogFile.h"
 #include <cassert>
+#include <cstdio>
 
 #define FMT_HEADER_ONLY
 #include "fmt/format.h"
 
 #ifdef _WIN32
 #include <windows.h>
+//#define _CRT_SECURE_NO_WARNINGS
 #elif __linux__
 #include <unistd.h>
 #endif
 
+#include <iostream>
 using namespace stone;
 using std::chrono::system_clock;
 
 FileAppender::FileAppender(string_view filename)
-    : fp_(fopen(filename.data(), "ae")), writtenBytes_(0)
+    : fp_(fopen(filename.data(), "a")), writtenBytes_(0)
 {
     assert(fp_);
-    ::setbuffer(fp_, appendBuffer_.data(), appendBuffer_.size());
+    ::setvbuf(fp_, appendBuffer_.data(), _IOFBF, appendBuffer_.size());
 }
 FileAppender::FileAppender(const char *filename)
-    : fp_(fopen(filename, "ae")), writtenBytes_(0)
+    : fp_(fopen(filename, "a")), writtenBytes_(0)
 {
     assert(fp_);
-    ::setbuffer(fp_, appendBuffer_.data(), appendBuffer_.size());
+    ::setvbuf(fp_, appendBuffer_.data(), _IOFBF, appendBuffer_.size());
 }
 FileAppender::~FileAppender()
 {
@@ -34,7 +37,11 @@ FileAppender::~FileAppender()
 
 size_t FileAppender::write(const char *line, size_t len)
 {
+#ifdef _WIN32
+    return ::_fwrite_nolock(line, 1, len, fp_);
+#elif __linux__
     return ::fwrite_unlocked(line, 1, len, fp_);
+#endif
 }
 
 void FileAppender::append(const char *line, size_t len)
@@ -63,7 +70,7 @@ LogFile::LogFile(string_view basename, off_t rollSize,  int flushInterval, int c
       checkEveryN_(checkEveryN), startOfPeriod_(0), lastRoll_(0), lastFlush_(0)
 
 {
-    assert(basename.find('/') == string::npos);
+    assert(basename.find('/') == string_view::npos);
     rollFile();
 }
 
@@ -112,7 +119,7 @@ void LogFile::flush()
 bool LogFile::rollFile()
 {
     time_t now = 0;
-    string filename = filePath.data() + getLogFileName(basename_, now);
+    string filename = getLogFileName(basename_, now);
     time_t start = now / kRollPerSeconds_ * kRollPerSeconds_;
 
     if (now > lastRoll_)
@@ -135,7 +142,11 @@ string LogFile::getLogFileName(std::string_view basename, time_t &now)
     now = system_clock::to_time_t(system_clock::now());
     char t_time[32] = {0};
     char pidbuf[32] = {0};
-    auto &[second, minute, hour, day, month, year, _1, _2, _3, _4, _5] = *std::localtime(&now);
+#ifdef _WIN32
+    auto& [second, minute, hour, day, month, year, _1, _2, _3] = *std::localtime(&now);
+#else
+    auto& [second, minute, hour, day, month, year, _1, _2, _3, _4, _5] = *std::localtime(&now);
+#endif // _WIN32  
 
     auto _getpid = []()
     {
@@ -155,7 +166,8 @@ string LogFile::getLogFileName(std::string_view basename, time_t &now)
     {
         char buf[256];
 #ifdef _WIN32
-        if (::GetComputerNameA(buf, sizeof(buf)))
+        DWORD buf_len = sizeof(buf);
+        if (::GetComputerNameA(buf,&buf_len)==TRUE)
         {
             buf[sizeof(buf) - 1] = '\0';
             return buf;
@@ -174,7 +186,15 @@ string LogFile::getLogFileName(std::string_view basename, time_t &now)
     }();
 
     filename += pidbuf;
+
+#ifdef _WIN32
+    for(auto &c : filename)
+		if(c == ':'||c==' '||c=='?')
+			c = '_';
+#endif
+
     filename += ".log";
+
 
     return filename;
 }

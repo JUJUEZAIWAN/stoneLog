@@ -102,7 +102,7 @@ namespace stone
         else
         {
             // flush the t_localBuffer to g_output
-            g_output(t_localBuffer->begin(), t_localBuffer->length());
+            g_output(&*t_localBuffer->begin(), t_localBuffer->length());
             t_localBuffer->reset();
             t_localBuffer->append(buffer.begin(), buffer.length());
         }
@@ -158,12 +158,15 @@ namespace stone
         auto now = system_clock::now();
         time_t now_c = system_clock::to_time_t(now);
         int microSeconds = std::chrono::duration_cast<microseconds>(now.time_since_epoch()).count() % 1000000;
-
         // if the time is not the same second, update the time
         if (now_c != t_last_sec)
         {
             t_last_sec = now_c;
-            auto &[second, minute, hour, day, month, year, _1, _2, _3, _4, _5] = *std::localtime(&now_c);
+#ifdef _WIN32
+            auto& [second, minute, hour, day, month, year, _1, _2, _3] = *std::localtime(&now_c);
+#else
+            auto& [second, minute, hour, day, month, year, _1, _2, _3,_4,_5] = *std::localtime(&now_c);
+#endif // _WIN32           
 
             fmt::format_to(std::begin(t_time), "{:4d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}", year + 1900, month + 1, day, hour, minute, second);
         }

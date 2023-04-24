@@ -10,7 +10,7 @@
 using namespace stone;
 using namespace std;
 
-string s1("hello world", 100);
+string s1("hello world");
 int num = 1000000;
 char c = 'a';
 double d = 1.234;
@@ -57,7 +57,8 @@ void testFmt()
 
 int main()
 {
-    AsyncLogConfig<LogFile> g_logfile(std::make_unique<LogFile>("test.log", 1024 * 1024*100));
+    auto prt = std::make_unique<LogFile>("test.log", 1024 * 1024 * 100);
+    AsyncLogConfig<LogFile> g_logfile(std::move(prt));
     g_logfile.setOutputAndFlush();
     Logger::setLogLevel(Logger::TRACE);
     vector<thread> threads;

@@ -43,7 +43,7 @@ namespace stone
             return *this;
         }
 
-        LogStream &operator<<(const std::string_view &s);
+        LogStream &operator<<(std::string_view s);
         LogStream &operator<<(char c);
         LogStream &operator<<(const char *s);
         LogStream &operator<<(const unsigned char *s);

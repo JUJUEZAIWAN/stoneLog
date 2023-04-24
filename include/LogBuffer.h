@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <cstring>
+#include <string_view>
 
 namespace stone
 {
@@ -25,6 +26,7 @@ namespace stone
 
 
     public:
+
         size_t avail()
         {
             return buf_.size() - length();
@@ -38,6 +40,19 @@ namespace stone
                 currentiter_ += len;
             }
         }
+
+        void append(std::string_view s)
+        {
+			append(s.data(), s.size());
+		}
+                
+        void append(char* begin, char* end)
+        {
+			append(begin, end - begin);
+		}
+
+ 
+
 
         void reset()
         {
@@ -60,19 +75,19 @@ namespace stone
             return string(buf_.begin(), currentiter_);
         }
 
-        inline constexpr typename std::array<char, N>::iterator begin()
+        inline char* begin()
         {
-            return buf_.begin();
+            return &*buf_.begin();
         }
 
-        inline constexpr typename std::array<char, N>::iterator end()
+        inline char* end()
         {
-            return buf_.end();
+            return &*(buf_.end()-1);
         }
 
-        inline constexpr typename std::array<char, N>::iterator current()
+        inline char* current()
         {
-            return currentiter_;
+            return &*currentiter_;
         }
 
         void addLength(size_t len)

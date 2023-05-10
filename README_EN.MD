@@ -1,8 +1,12 @@
-# stoneLog 
-[中文](README.MD)
+<div align="center">
+
+# stoneLog
+
+[中文](README.MD) | English
+
+</div>
 
 stonelog is a simple, high-performance, cross-platform C++ log library.
-
 
 Each line of the log is a temporary object, and the log information is written into the buffer through the stream input and formatted input, and then the log information is written to the local file or network file through the callback static function.
 
@@ -10,23 +14,22 @@ The asynchronous implementation refers to the double buffer in muduo, and the lo
 
 Define the output type by yourself, as long as the append function and flush function are implemented.
 
-
 ## features
-- [ ]stream input and formatted input  
-- [ ]synchronous/asynchronous log  
-- [ ]local/remote log  
-- [ ]log file rolling  
-- [ ]output is easy to expand  
-- [ ]cross-platform
+- [ ] stream input and formatted input
+- [ ] synchronous/asynchronous log
+- [ ] local/remote log
+- [ ] log file rolling
+- [ ] output is easy to expand
+- [ ] cross-platform
 
 ## dependency
 ·C++17  
 ·fmtlib (included)  
 
 
-## 使用
+## usages
 
-### 同步日志
+### synchronous logging
 
 ```c++
 int main()
@@ -45,7 +48,7 @@ int main()
 }
 ```
 
-### 异步日志
+### asynchronous logging
 
 ```c++
 int main()
@@ -117,7 +120,7 @@ void testFmt()
 
 
 ## TODO
- 
-- [ ]Dynamic configuration of logs: Currently only supports compile-time configuration, and will support runtime configuration later  
-- [ ]Performance test: Currently only a simple test, and will be tested in more detail later  
-- [ ]Support more outputs: Currently supports local files, TCP, UDP, and will support more outputs later  
+
+- [ ] Dynamic configuration of logs: Currently only supports compile-time configuration, and will support runtime configuration later
+- [ ] Performance test: Currently only a simple test, and will be tested in more detail later
+- [ ] Support more outputs: Currently supports local files, TCP, UDP, and will support more outputs later
